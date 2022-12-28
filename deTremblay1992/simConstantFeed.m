@@ -1,0 +1,29 @@
+function [t_ode15s,X_ode15s] = simConstantFeed(Ts,N,STATEFCN,x0,u_const)
+
+t_ode15s = 0;
+X_ode15s = x0'; 
+t0 = 0;
+for i = 1:N
+    ODEFCN = @(t,x) STATEFCN(x,u_const);
+    TSPAN = [t0, t0 + Ts]; % Ts = 0.01
+    X_stepend = X_ode15s(end,:)';
+    [TOUT,XOUT] = ode15s(ODEFCN,TSPAN,X_stepend);
+    t_ode15s = [t_ode15s; TOUT(end)];
+    X_ode15s = [X_ode15s; XOUT(end,:)];
+    t0 = t0 + Ts;
+end
+
+mAbFinal = X_ode15s(end,8)*X_ode15s(end,1);
+
+fprintf( ...
+            [ ...
+                'Final liquid volume: %g L\n' ...
+                'Final mAb conc: %g mg/L\n' ...
+                'Final mAb amount: %g mg\n' ...
+            ], ...
+            X_ode15s(end,1), ...
+            X_ode15s(end,8), ...
+            mAbFinal ...
+        );
+
+end
